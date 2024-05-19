@@ -1,0 +1,20 @@
+{
+    "name": "social-media-automation-prototype",
+    "version": "1.0",
+    "description": "Social Media Automation and Advanced Webscraping Prototype",
+    "author": "Darielson Albarado <darielson.albarado@gmail.com>",
+    "scripts": {
+        "start": "node install.js"
+    },
+    "dependencies": {
+        "mysql": "*",
+        "node-fetch": "*",
+        "request-promise": "*",
+        "accept-language-parser": "*",
+        "ua-parser-js": "*",
+        "axios": "*",
+        "puppeteer": "*",
+        "puppeteer-extra": "*",
+        "puppeteer-extra-plugin-stealth": "*"
+    }
+}
