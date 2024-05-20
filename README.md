@@ -29,6 +29,8 @@ npm run start
 node .\logininstagram.js
 ```
 
+## Documentation
+
 ### Main libraries puppeteer-extra and puppeteer-extra-plugin-stealth:
 – Enhanced Puppeteer library. Functionalities:
   – Avoid detection by Puppeteer.
