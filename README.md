@@ -12,6 +12,23 @@
 
 The Prototype of Social Media Automation and Advanced Web Scraping aims to increase the level of efficiency of Web Scraping techniques for didactic purposes. Much is known about libraries like Curl (Php) or Axios (Nodejs), however, web scraping goes far beyond that. When using standard libraries like these, many pieces of information are leaked when making queries, and we don't even realize it! The Curl in PHP, by default, usually sets the User-Agent to something like "PHP/{PHP version} (cURL/{cURL version})”. It is easily possible to set another User-Agent similar to a real browser, such as for example “Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/W.X.Y.Z Mobile Safari/537.36 (compatible; Google-InspectionTool/1.0)”, with this it will already be possible to access many sites, but this is just the tip of the iceberg. When it comes to big companies like social networks, engineers and developers from these companies work hard to prevent automated access. Therefore, advanced techniques must be employed to make HTTP requests without being blocked! For this reason, there are many deep details introduced in this prototype. The goal is not to achieve 100% success in requests (which is almost impossible), but something around 70% is quite acceptable!
 
+## Installation
+To install this prototype, run the following commands in the terminal:
+
+```bash linux
+git clone https://github.com/Darielson-Albarado/Social-Media-Automation-Prototype-Nodejs
+```
+
+#### Go to the main folder and run the installation
+```bash
+npm run start
+```
+
+#### Usage example script: exemples/logininstagram.js
+```bash
+node .\logininstagram.js
+```
+
 ### Main libraries puppeteer-extra and puppeteer-extra-plugin-stealth:
 – Enhanced Puppeteer library. Functionalities:
   – Avoid detection by Puppeteer.
@@ -46,14 +63,19 @@ Para instalar este protótipo execute os seguintes comandos no terminal:
 
 ```bash linux
 git clone https://github.com/Darielson-Albarado/Social-Media-Automation-Prototype-Nodejs
+```
 
 #### Vá até a pasta principal e execute a instalação
 ```bash
 npm run start
+```
 
-#### Script de exemplo exemples/logininstagram.js
+#### Script de exemplo de utilização exemples/logininstagram.js
 ```bash
 node .\logininstagram.js
+```
+
+## Documentação
 
 ### Bibliotecas principais puppeteer-extra e puppeteer-extra-plugin-stealth:
 – Biblioteca Puppeteer “melhorada”. Funcionalidades: 
