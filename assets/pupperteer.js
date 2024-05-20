@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer-extra')
 // add stealth plugin and use defaults (all evasion techniques)
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 puppeteer.use(StealthPlugin());
-const browserheaders = require("./browserheaders");
+const { browserheaders } = require("./browserheaders");
 const proxyes = require("./proxys");
 const countrylanguage = require('country-language');
 const languageTags = require('language-tags');
@@ -199,16 +199,16 @@ class puppeteerscrape {
     const languages = countrylanguage.getCountryLanguages(countryCode);
 
     if (languages.length > 0) {
-      if (languages[0]['iso639_1']){
+      if (languages[0]['iso639_1']) {
         return languages[0]['iso639_1'];
-    } else {
+      } else {
         return false;
+      }
     }
-   }
   }
 
-  async getpage(url) {
-    // função para acessar páginas
+  async preparebrowser() {
+    // função para preparar browser
     try {
       // Obter id do navegador
       let infoacesso;
@@ -219,11 +219,8 @@ class puppeteerscrape {
         this.log(browser);
 
         // Setar headers
-        this.log("Configurando headers");
         // Configurando os headers
-
         //Obter header aleatório
-        this.log("Carregando headers...");
         const data = await this.getbrowserheaders();
         const headerid = data.id;
         this.log("Usando headers: " + data.headers);
@@ -236,10 +233,11 @@ class puppeteerscrape {
         // Abrir nova aba
         this.log("Abrindo nova aba");
         const page = await browser.newPage();
+        // Alterar user agent
         await page.setUserAgent(useragent);
         // Autenticar proxys se houver
         this.log(browser.proxyinfo);
-        if (options && options.useproxy && browser.proxyinfo && browser.proxyinfo.username
+        if (this.options && this.options.useproxy && browser.proxyinfo && browser.proxyinfo.username
           && browser.proxyinfo.password) {
           const proxyuser = browser.proxyinfo.username;
           const proxypasswd = browser.proxyinfo.password;
@@ -250,30 +248,33 @@ class puppeteerscrape {
           this.log(`Autenticando proxy ip ${proxyip} user ${proxyuser} passwd ${proxypasswd}`);
 
           // Autenticar proxye
-          const authproxy = await page.authenticate({ username: proxyuser, password: proxypasswd });
-
+          try {
+            const authproxy = await page.authenticate({ username: proxyuser, password: proxypasswd });
+          } catch (error) {
+            this.log(error);
+          }
           // Configurar Accept-Language de acordo com idioma do proxy
-          if (countrycode.length > 0){
-          // Retornar codigo iso389_1 com idioma da região
-          const countryiso639_1 = this.getcountrylang(countrycode);
+          if (countrycode.length > 0) {
+            // Retornar codigo iso389_1 com idioma da região
+            const countryiso639_1 = this.getcountrylang(countrycode);
 
-          if (countryiso639_1){
-          // converter para minusculo
-          countryiso639_1.toLowerCase();
-          // Adicionar dados ao header
-          const taglang = `${countryiso639_1}-${countrycode}`;
-          // Verificar se tag de idioma é válido
-          if (languageTags(taglang).valid()) {
-            this.log("Tag de idioma utilizado "+taglang);
-            headers['Accept-Language'] = `${taglang},${countrycodeminusc};q=0.9`;
-          }else{
-            this.logerror("Tag de idioma inválido!");
-          }
-          
-          }else{
-            this.logerror("Erro ao identificar Country Code!");
-          }
-          }else{
+            if (countryiso639_1) {
+              // converter para minusculo
+              countryiso639_1.toLowerCase();
+              // Adicionar dados ao header
+              const taglang = `${countryiso639_1}-${countrycode}`;
+              // Verificar se tag de idioma é válido
+              if (languageTags(taglang).valid()) {
+                this.log("Tag de idioma utilizado " + taglang);
+                headers['Accept-Language'] = `${taglang},${countrycodeminusc};q=0.9`;
+              } else {
+                this.logerror("Tag de idioma inválido!");
+              }
+
+            } else {
+              this.logerror("Erro ao identificar Country Code!");
+            }
+          } else {
             this.logerror("Proxy sem Country Code!");
           }
         }
@@ -288,23 +289,25 @@ class puppeteerscrape {
             return;
           }
           // Add headers customizados
-          
+
           //const headers = request.headers();
           //headers['Accept-Language'] = "pt-BR,br;q=0.9";
           request.continue({ headers });
         });
 
         this.log("Navegador aberto!");
-        // Navega para uma URL
-        this.log("Acessando página! " + url);
-        await page.goto(url);
-        this.log("Página carregada! " + url);
-        // Tira uma captura de tela
-        //await page.screenshot({ path: 'example.png' });
-        if (page) {
-          browser.paginaaberta = page;
-        } else {
-          browser.paginaaberta = false;
+        try {
+          // Tira uma captura de tela
+          //await page.screenshot({ path: 'example.png' });
+          if (page) {
+            browser.paginaaberta = page;
+            return browser;
+          } else {
+            browser.paginaaberta = false;
+            return false;
+          }
+        } catch (error) {
+          this.log(error.message);
         }
       }
       // Fecha o navegador
@@ -317,47 +320,50 @@ class puppeteerscrape {
 
   async logininstagram() {
 
-    // acessar página de login do insta
-    const pageinsta = await this.getpage("https://www.instagram.com/accounts/login/?force_authentication=1");
-    //const pageinsta = await this.getpage("http://httpbin.org/headers");
+    // Configurar aba e acessar página de login do insta
+    const browser = await this.preparebrowser();
+    const url = "https://instagram.com/";
+    let page = browser.paginaaberta;
 
-    if (pageinsta) {
-      this.log("Concluido");
+    // Executar parser ou script de escrape
+    if (page) {
+
+      try {
+        // Navega para uma URL
+        this.log("Acessando página! " + url);
+        // Setar limite de carregamento em 1 minuto
+        await page.goto(url, { 'timeout': 60000, 'waitUntil': 'domcontentloaded' });
+        await page.content();
+      } catch (error) {
+        this.log("Erro ao carregar página do instagram " + error.message);
+        process.abort();
+        return false;
+      }
+
+      for (let t = 1; t <= 3; t++) {
+        try {
+          console.log('Preenchendo formulários');
+
+          await page.waitForSelector('[name="username"]', { visible: true, timeout: 10000 });
+          await page.type('[name="username"]', this.emailorusername, { timeout: 15000, delay: 100 });
+          await page.waitForSelector('[name="password"]', { visible: true, timeout: 10000 });
+          await page.type('[name="password"]', this.password, { timeout: 15000, delay: 100 });
+
+          Promise.all([
+            page.waitForNavigation(),
+            await page.click('#loginForm > div > div:nth-child(3) > button'),
+            this.log("Concluído")
+          ]);
+
+          break;
+        } catch (error) {
+          this.log(`Erro na tentativa ${t} ` + error.message);
+          process.abort();
+        }
+      }
     }
   }
 
 }
 
-// Objeto para chamar as instâncias de execução, pode ser implementado em JSON com uma APIREST de entrada
-// É possível abrir diversos navegadores simultaneamente, porém, usar novas abas economiza o consumo de memória
-
-const options = {
-  type: {
-    login: {
-      newinstagram: true,
-      verificarlogin: true,
-    }
-  },
-  navegador: {
-    tipo: "Chrome",
-    total: 1
-  },
-  gethttpheaders: {
-    server: "httpbin_org",
-    total: 1
-  },
-  useproxy: true,
-  salvarsessao: {
-    status: true,
-    savedb: true,
-    formato: "json"
-  },
-  log: {
-    show: true,
-    write: true
-  }
-}
-
-// Exemplo de chamada de execução
-const logininsta = new puppeteerscrape("asdasd", 1238912, options);
-logininsta.startscrape();
+module.exports = puppeteerscrape;

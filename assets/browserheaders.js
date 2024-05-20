@@ -7,6 +7,7 @@ import('node-fetch').then((fetchModule) => {
 const request = require('request-promise');
 const UAParser = require('ua-parser-js');
 const accept_language_parser = require('accept-language-parser');
+const { get } = require('selenium-webdriver/http');
 
 class browserheaders {
     constructor(options) {
@@ -327,21 +328,38 @@ class browserheaders {
 
 }
 
-/*
-const headeroptions = {
-    setapi: {
-        apiscrapeopsio: {
-            resultcountlist: 200
+// Set a quantidade de headers para serem baixados e criados
+// Ative "atualizarheaders" para estruturar correntamente o Header antes de salvar no bd
+function getnewheaders(resultcountlist, atualizarheaders) {
+    const headeroptions = {
+        setapi: {
+            apiscrapeopsio: {
+                resultcountlist: resultcountlist
+            }
+        },
+        atualizarheaders: {
+            httpbin_org: atualizarheaders
         }
-    },
-    atualizarheaders: {
-        httpbin_org: true
     }
+
+    try {
+        getnewheaders = new browserheaders(headeroptions);
+    } catch (error) {
+        console.error('Erro ao criar novos headers:', error.message);
+        throw error;
+    }
+
 }
 
-getnewheaders = new browserheaders(headeroptions);
+// Exemplo de chamada 
+// getnewheaders(10, true);
 
+module.exports = {
+    browserheaders,
+    getnewheaders };
 
+//searchhttpsheaders.getvalidjson("https://headers.scrapeops.io/v1/browser-headers?api_key=b206ab29-5d99-4815-8723-e2c17a324ae3&num_results=2");
+/* Testes de verificação de headers salvos
 options = {
     navegador: {
         tipo: "Edge",
@@ -353,7 +371,3 @@ const searchhttpsheaders = new browserheaders();
 asdasd = searchhttpsheaders.getheaderssaved("httpbin_org", 1, options).then (resolve =>{
 console.log(resolve[0]);
 });*/
-
-module.exports = browserheaders;
-
-//searchhttpsheaders.getvalidjson("https://headers.scrapeops.io/v1/browser-headers?api_key=b206ab29-5d99-4815-8723-e2c17a324ae3&num_results=2");
